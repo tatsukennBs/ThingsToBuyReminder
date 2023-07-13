@@ -1,0 +1,37 @@
+@charset "UTF-8";
+
+/*h1 {
+	background-color: blue;
+}*/
+
+header {
+	background-color: #a9a9a9;
+}
+main {
+	margin: 0 auto;
+	padding: 10px 10px 10px 10px;
+}
+
+.description {
+	font-size: 16px;
+	padding-bottom: 20px;
+}
+
+.itemtable .tblelement1{
+	width: 25%;
+}
+.itemtable .tblelement2{
+	width: 20%;
+}
+.itemtable .tblelement3{
+	width: 15%;
+}
+.itemtable .tblelement4{
+	width: 15%;
+}
+.itemtable .tblelement5{
+	width: 10%;
+}
+.itemtable .tblelement6{
+	width: 15%;
+}
