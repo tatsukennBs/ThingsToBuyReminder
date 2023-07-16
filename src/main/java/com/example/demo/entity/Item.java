@@ -3,9 +3,6 @@ package com.example.demo.entity;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import jakarta.persistence.Entity;
-
-@Entity
 public class Item {
 	
 	private int itemId;
@@ -13,11 +10,12 @@ public class Item {
 	private String itemName;
 	private String category;
 	private Date purchaseDate;
+	private int purchaseIntervalId;
+	private int purchaseInterval;
 	private String createdBy;
 	private LocalDateTime createdTime;
 	private String updatedBy;
 	private LocalDateTime updatedTime;
-	private PurchaseInterval purchaseinterval;
 
 	public Item() {
 		
@@ -52,6 +50,18 @@ public class Item {
 	public void setPurchaseDate(Date purchaseDate) {
 		this.purchaseDate = purchaseDate;
 	}
+	public int getPurchaseIntervalId() {
+		return purchaseIntervalId;
+	}
+	public void setPurchaseIntervalId(int purchaseIntervalId) {
+		this.purchaseIntervalId = purchaseIntervalId;
+	}
+	public int getPurchaseInterval() {
+		return purchaseInterval;
+	}
+	public void setPurchaseInterval(int purchaseInterval) {
+		this.purchaseInterval = purchaseInterval;
+	}
 	public String getCreatedBy() {
 		return createdBy;
 	}
@@ -75,11 +85,5 @@ public class Item {
 	}
 	public void setUpdatedTime(LocalDateTime updatedTime) {
 		this.updatedTime = updatedTime;
-	}
-	public PurchaseInterval getPurchaseinterval() {
-		return purchaseinterval;
-	}
-	public void setPurchaseinterval(PurchaseInterval purchaseinterval) {
-		this.purchaseinterval = purchaseinterval;
 	}
 }

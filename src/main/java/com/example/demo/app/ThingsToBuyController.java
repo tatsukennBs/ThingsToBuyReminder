@@ -2,28 +2,28 @@ package com.example.demo.app;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.entity.Item;
+import com.example.demo.entity.PurchaseInterval;
 import com.example.demo.service.ThingsToBuyService;
 
 @Controller
 @RequestMapping("/ThingsToBuy")
 public class ThingsToBuyController {
 	
-	@Autowired
 	private final ThingsToBuyService service;
 	
-	public ThingsToBuyController(ThingsToBuyService service) {
-		this.service = service;
+	public ThingsToBuyController(ThingsToBuyService thingsToBuyService) {
+		this.service = thingsToBuyService;
 	}
 	/**
 	 * 買い物リストの一覧を表示します
@@ -52,30 +52,36 @@ public class ThingsToBuyController {
 	
 	/**
 	 * 品目登録完了画面を表示します
-	 * @param form
+	 * @param thingsToBuyForm
 	 * @param result
 	 * @param model
 	 * @return resources/templates下のHTMLファイル名
 	 */
 	@PostMapping("/regist/complete")
 	public String registComplete(
-			@Validated ThingsToBuyForm form,
+			@Validated @ModelAttribute ThingsToBuyForm thingsToBuyForm,
 			BindingResult result,
 			Model model) {
 		
 		Item item = new Item();
-		item.setItemName(form.getItemName());
-		item.setCategory(form.getCategory());
-		item.setPurchaseDate(form.getPurchaseDate());
+		item.setItemName(thingsToBuyForm.getItemName());
+		item.setCategory(thingsToBuyForm.getCategory());
+		item.setPurchaseDate(thingsToBuyForm.getPurchaseDate());
+		
 		
 		//エラーがあった場合、自画面遷移
 		if (result.hasErrors()) {
-			model.addAttribute("ThingsToBuyForm", form);
+			model.addAttribute("ThingsToBuyForm", thingsToBuyForm);
 			return "regist";
 			
 		} else {
 			service.insertItem(item);
-			model.addAttribute("ThingsToBuyForm", form);
+			
+			PurchaseInterval purchaseinterval = new PurchaseInterval();
+			service.insertPurchaseInterval(purchaseinterval, item.getItemId());
+			
+			model.addAttribute("ThingsToBuyForm", thingsToBuyForm);
+			
 			return "registcomplete";
 		}		
 	}
@@ -86,8 +92,8 @@ public class ThingsToBuyController {
 	 * @param itemid
 	 * @return resources/templates下のHTMLファイル名
 	 */
-	@GetMapping("/edit/{id}")
-	public String edit(Model model, @PathVariable("id") int itemid) {
+	@GetMapping("/edit")
+	public String edit(Model model, @RequestParam("itemid") int itemid) {
 		return "edit";
 	}
 	
@@ -99,12 +105,12 @@ public class ThingsToBuyController {
 	 * @param itemid
 	 * @return resources/templates下のHTMLファイル名
 	 */
-	@PostMapping("/edit/{id}/complete")
+	@PostMapping("/edit/complete")
 	public String editComplete(
 			@Validated ThingsToBuyForm form,
 			BindingResult result,
 			Model model,
-			@PathVariable("id") int itemid) {
+			@RequestParam("itemid") int itemid) {
 		
 		Item item = new Item();
 		item.setItemId(itemid);
@@ -130,35 +136,35 @@ public class ThingsToBuyController {
 	 * @param itemid
 	 * @return resources/templates下のHTMLファイル名
 	 */
-	@PostMapping("/delete/{id}/complete")
-	public String delete(
-			Model model,
-			@PathVariable("id") int itemid)  {
+	@GetMapping("/delete/complete")
+	public String delete(Model model, @RequestParam("itemid") int itemid)  {
 		
-		service.deleteById(itemid);
+		//TODO 画面遷移のため一旦コメントアウト
+		//service.deleteById(itemid);
 		return "deletecomplete";
 	}
 	
-	@PostMapping("/registPurchaseDate/{id}")
+	@GetMapping("/registPurchaseDate")
 	public String registPurchaseDate(
-			@Validated ThingsToBuyForm form,
-			BindingResult result,
+			//@Validated ThingsToBuyForm form,
+			//BindingResult result,
 			Model model,
-			@PathVariable("id") int itemid) {
+			@RequestParam("itemid") int itemid) {
 		
 		Item item = new Item();
 		item.setItemId(itemid);
-		item.setPurchaseDate(form.getPurchaseDate());
+		//item.setPurchaseDate(form.getPurchaseDate());
 		
 		//エラーがあった場合、自画面遷移
-		if (result.hasErrors()) {
-			model.addAttribute("ThingsToBuyForm", form);
-			return "index";
+		//if (result.hasErrors()) {
+			//model.addAttribute("ThingsToBuyForm", form);
+			//return "index";
 			
-		} else {
-			service.updatePurchaseDate(item);
-			model.addAttribute("ThingsToBuyForm", form);
-			return "index";
-		}		
+		//} else {
+			//TODO 画面遷移のため一旦コメントアウト、itemidを渡して
+			//service.updatePurchaseDate(item);
+			//model.addAttribute("ThingsToBuyForm", form);
+			return "redirect:/ThingsToBuy";
+		//}		
 	}
 }

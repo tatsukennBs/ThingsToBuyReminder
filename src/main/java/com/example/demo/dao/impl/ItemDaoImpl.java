@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 
 import com.example.demo.dao.ItemDao;
 import com.example.demo.entity.Item;
-import com.example.demo.entity.PurchaseInterval;
 
 @Repository	
 public class ItemDaoImpl implements ItemDao {
@@ -25,39 +24,48 @@ public class ItemDaoImpl implements ItemDao {
 	//Itemsテーブルを全件検索し、最終購入日が最新のものを取得
 	@Override
 	public List<Item> findLatestAll() {
-		String sqlItem = "SELECT * FROM"
+
+		String sql = "SELECT with_rownum.item_id, with_rownum.item_sequence, with_rownum.item_name,"
+				+ "with_rownum.category, with_rownum.purchase_date, purchase_interval.purchase_interval_id,"
+				+ "purchase_interval.purchase_interval, with_rownum.created_by, with_rownum.created_time,"
+				+ "with_rownum.updated_by, with_rownum.created_time FROM"
 				+ "  (SELECT *,row_number() over(partition by item_id ORDER BY purchase_date desc) rownum"
 				+ " FROM things_to_buy.items"
 				+ " ) with_rownum"
-				+ " WHERE"
-				+ " rownum = 1";
-		String sqlPuchaseInterval = "SELECT * FROM things_to_buy.purchase_interval";
-	
+				+ " LEFT JOIN things_to_buy.purchase_interval USING(item_id)"
+				+ " WHERE rownum = 1";
+		
 		//JdbcTempleteを使用しSQL実行
-		List<Map<String,Object>> resultList = jdbcTemplete.queryForList(sqlItem);
-		List<Map<String,Object>> resultListInterval = jdbcTemplete.queryForList(sqlPuchaseInterval);
+		List<Map<String,Object>> resultList = jdbcTemplete.queryForList(sql);
+		//List<Map<String,Object>> resultListInterval = jdbcTemplete.queryForList(sqlPuchaseInterval);
 		
 		//取得結果格納用Listを作成
 		List<Item> list = new ArrayList<Item>();
-
-		Item item = new Item();
-		PurchaseInterval purchaseInterval = new PurchaseInterval();
 		
 		//SQL実行結果をEntityにセットする
 		for (Map<String,Object>result : resultList) {
+			
+			Item item = new Item();
+			item.setItemId((int)result.get("item_id"));
 			item.setItemName((String)result.get("item_name"));
 			item.setCategory((String)result.get("category"));
 			item.setPurchaseDate((Date)result.get("purchase_date"));
-		}
-		for (Map<String,Object>resultinterval : resultListInterval) {
-			purchaseInterval.setPurchaseInterval((int)resultinterval.get("purchase_interval"));
+			if (result.get("purchase_interval")  == null) {
+				item.setPurchaseInterval(0);
+			} else {
+				item.setPurchaseInterval((int)result.get("purchase_interval"));
+			}
+			list.add(item);
 		}
 		
-		//itemにpurchaseIntervalをセット(テーブル結合をオブジェクトとして反映)
-		item.setPurchaseinterval(purchaseInterval);
-
-		list.add(item);
-		
+		return list;
+	}
+	
+	//itemsテーブルからidに紐づく最終購入日のListを取得
+	@Override
+	public List<Date> getPurchaseDate(int id) {
+		String sql = "SELECT purchase_date FROM things_to_buy.items WHERE item_id = ?";
+		List<Date> list = jdbcTemplete.queryForList(sql, Date.class, id);
 		return list;
 	}
 
@@ -80,16 +88,22 @@ public class ItemDaoImpl implements ItemDao {
 				,LocalDateTime.now()
 				,currentUser				
 				,LocalDateTime.now());
+		
+		//item_idをエンティティにも設定する
+		item.setItemId(Integer.parseInt(getIDMax) + 1);
 	}
 
 	//Itemsテーブルの品目名、カテゴリの更新
 	@Override
 	public int updateItem(Item item) {
-		String sql = "UPDATE things_to_buy.items SET item_name = ?, category = ? WHERE item_id = ?";
+		String sql = "UPDATE things_to_buy.items SET item_name = ?, category = ?, updated_by=?, updated_time=? WHERE item_id = ?";
+		String currentUser = "SELECT current_user()";
 		
 		int resultInt = jdbcTemplete.update(sql
 				,item.getItemName()
 				,item.getCategory()
+				,currentUser
+				,LocalDateTime.now()
 				,item.getItemId());
 		
 		return resultInt;
@@ -99,12 +113,15 @@ public class ItemDaoImpl implements ItemDao {
 	@Override
 	public int updatePurchaseDate(Item item) {
 		String preparesql = "SELECT @purchase_date_latest := MAX(purchase_date) FROM things_to_buy.items WHERE item_id = ?";
-		String executesql ="UPDATE things_to_buy.items SET purchase_date = ? WHERE item_id = ? AND purchase_date = @purchase_date_latest";
+		String executesql ="UPDATE things_to_buy.items SET purchase_date = ?, updated_by=?, updated_time=? WHERE item_id = ? AND purchase_date = @purchase_date_latest";
+		String currentUser = "SELECT current_user()";
 		
 		jdbcTemplete.queryForList(preparesql,item.getItemId());
 		
 		int resultInt = jdbcTemplete.update(executesql
 				,item.getPurchaseDate()
+				,currentUser
+				,LocalDateTime.now()
 				,item.getItemId());
 		
 		return resultInt;
