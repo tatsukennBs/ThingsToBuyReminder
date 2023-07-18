@@ -75,34 +75,50 @@ public class ItemDaoImpl implements ItemDao {
 		String sql = "INSERT INTO things_to_buy.items(item_id, item_sequence, item_name, category, purchase_date, created_by, created_time, updated_by, updated_time)"
 				+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
-		String getIDMax = "SELECT MAX(sequence_itemid) FROM things_to_buy.items_seq";
-		String currentUser = "SELECT current_user()";
-		
 		jdbcTemplete.update(sql
-				,Integer.parseInt(getIDMax) + 1
+				,getItemIdMax() + 1
 				,1
 				,item.getItemName()
 				,item.getCategory()
 				,item.getPurchaseDate()
-				,currentUser
+				,getCurrentUser()
 				,LocalDateTime.now()
-				,currentUser				
+				,getCurrentUser()				
 				,LocalDateTime.now());
 		
 		//item_idをエンティティにも設定する
-		item.setItemId(Integer.parseInt(getIDMax) + 1);
+		item.setItemId(getItemIdMax() + 1);
+	}
+	
+	/**
+	 * 現在のDBユーザーを取得する
+	 * @return DBユーザー名
+	 */
+	private String getCurrentUser() {
+		String getCurrentUser = "SELECT current_user()";
+		String currentUser = jdbcTemplete.queryForObject(getCurrentUser, String.class);
+		return currentUser;
+	}
+
+	/**
+	 * itemsテーブルのitemIDの最大値を取得する
+	 * @return itemsテーブルのitemIDの最大値
+	 */
+	private int getItemIdMax() {
+		String getItemIdMax = "SELECT MAX(sequence_itemid) FROM things_to_buy.items_seq";
+		int ItemIdMax = jdbcTemplete.queryForObject(getItemIdMax, Integer.class);
+		return ItemIdMax;
 	}
 
 	//Itemsテーブルの品目名、カテゴリの更新
 	@Override
 	public int updateItem(Item item) {
 		String sql = "UPDATE things_to_buy.items SET item_name = ?, category = ?, updated_by=?, updated_time=? WHERE item_id = ?";
-		String currentUser = "SELECT current_user()";
 		
 		int resultInt = jdbcTemplete.update(sql
 				,item.getItemName()
 				,item.getCategory()
-				,currentUser
+				,getCurrentUser()
 				,LocalDateTime.now()
 				,item.getItemId());
 		
@@ -114,13 +130,14 @@ public class ItemDaoImpl implements ItemDao {
 	public int updatePurchaseDate(Item item) {
 		String preparesql = "SELECT @purchase_date_latest := MAX(purchase_date) FROM things_to_buy.items WHERE item_id = ?";
 		String executesql ="UPDATE things_to_buy.items SET purchase_date = ?, updated_by=?, updated_time=? WHERE item_id = ? AND purchase_date = @purchase_date_latest";
-		String currentUser = "SELECT current_user()";
+		
+		//TODO 最終購入日更新時にitems_seqテーブルを更新する必要あり
 		
 		jdbcTemplete.queryForList(preparesql,item.getItemId());
 		
 		int resultInt = jdbcTemplete.update(executesql
 				,item.getPurchaseDate()
-				,currentUser
+				,getCurrentUser()
 				,LocalDateTime.now()
 				,item.getItemId());
 		
