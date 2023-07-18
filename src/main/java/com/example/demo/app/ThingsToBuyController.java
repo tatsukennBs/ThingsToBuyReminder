@@ -1,10 +1,12 @@
 package com.example.demo.app;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.entity.Item;
-import com.example.demo.entity.PurchaseInterval;
 import com.example.demo.service.ThingsToBuyService;
 
 @Controller
@@ -47,6 +48,8 @@ public class ThingsToBuyController {
 	@GetMapping("/regist")
 	public String regist(Model model) {
 		
+		model.addAttribute("thingsToBuyForm", new ThingsToBuyForm());
+		
 		return "regist";
 	}
 	
@@ -68,22 +71,26 @@ public class ThingsToBuyController {
 		item.setCategory(thingsToBuyForm.getCategory());
 		item.setPurchaseDate(thingsToBuyForm.getPurchaseDate());
 		
-		
-		//エラーがあった場合、自画面遷移
+		//エラーがあった場合、エラーメッセージをList設定し自画面遷移
 		if (result.hasErrors()) {
-			model.addAttribute("ThingsToBuyForm", thingsToBuyForm);
+			
+			List <String> errorList = new ArrayList<String>();
+			for(ObjectError e : result.getAllErrors()) {
+				
+				errorList.add(e.getDefaultMessage());
+			}
+			model.addAttribute("ErrorList", errorList);
+			
 			return "regist";
-			
+
 		} else {
-			service.insertItem(item);
-			
-			PurchaseInterval purchaseinterval = new PurchaseInterval();
-			service.insertPurchaseInterval(purchaseinterval, item.getItemId());
-			
-			model.addAttribute("ThingsToBuyForm", thingsToBuyForm);
+			service.insertItem(item);	
+			service.insertItemSeq(item.getItemId());
+			service.insertPurchaseInterval(item.getItemId());
+			model.addAttribute("complete", "品目登録が完了しました");
 			
 			return "registcomplete";
-		}		
+		}
 	}
 	
 	/**
@@ -126,6 +133,9 @@ public class ThingsToBuyController {
 		} else {
 			service.updateItem(item);
 			service.updatePurchaseDate(item);
+			
+			//PurchaseInterval purchaseinterval = new PurchaseInterval();
+			//service.insertPurchaseInterval(purchaseinterval, item.getItemId());
 			model.addAttribute("ThingsToBuyForm", form);
 			return "editcomplete";
 		}	
