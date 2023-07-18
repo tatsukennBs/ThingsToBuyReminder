@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
   	<title>買い物リスト</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 </head>
@@ -26,9 +26,6 @@
 	</header>
 	<main class="container mb-5">
 		<div class="description mb-4">
-<!--		品目追加の場合は<b>品目登録ボタン</b>より登録してください。<br>
-		品目内容を編集したい場合は<b>編集リンク</b>より編集してください。<br>
-		リストを削除したい場合は<b>削除リンク</b>を押してください。<br>-->
 		下記リスト商品を購入したら<strong>購入ボタン</strong>を押してください。
 		</div>
 		<div class="table-responsive">
