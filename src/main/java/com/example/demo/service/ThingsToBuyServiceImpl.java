@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dao.ItemDao;
+import com.example.demo.dao.ItemSeqDao;
 import com.example.demo.dao.PurchaseIntervalDao;
 import com.example.demo.entity.Item;
 import com.example.demo.entity.PurchaseInterval;
@@ -15,10 +16,12 @@ import com.example.demo.logic.PurchaseIntervalLogic;
 public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 
 	private final ItemDao dao;
+	private final ItemSeqDao daoSeq;
 	private final PurchaseIntervalDao daoInterval;
 	
-	public ThingsToBuyServiceImpl(ItemDao dao, PurchaseIntervalDao daoInterval) {
+	public ThingsToBuyServiceImpl(ItemDao dao, ItemSeqDao daoSeq, PurchaseIntervalDao daoInterval) {
 		this.dao = dao;
+		this.daoSeq = daoSeq;
 		this.daoInterval = daoInterval;
 	}
 	
@@ -35,11 +38,15 @@ public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 	}
 	
 	@Override
-	public void insertPurchaseInterval(PurchaseInterval purchaseinterval, int itemId) {
-		
-		//購入間隔の平均値をエンティティに設定
-		setPurchaseDate(purchaseinterval, itemId);
-		daoInterval.insertInterval(purchaseinterval, itemId);	
+	public void insertItemSeq(int itemId) {
+		//DAO(Repository)クラスのInsert処理を呼び出し
+		daoSeq.insert(itemId);
+	}
+	
+	@Override
+	public void insertPurchaseInterval(int itemId) {
+		//DAO(Repository)クラスのInsert処理を呼び出し
+		daoInterval.insertInterval(itemId);	
 	}
 
 	@Override
@@ -73,6 +80,13 @@ public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 	public void deleteById(int id) {
 		
 		if (dao.deleteById(id) == 0) {
+			throw new ItemNotFoundException("削除する品目が存在しませんでした。");
+		}
+	}
+	@Override
+	public void deleteItemSeq(int itemId) {
+		
+		if (daoSeq.delete(itemId) == 0) {
 			throw new ItemNotFoundException("削除する品目が存在しませんでした。");
 		}
 	}

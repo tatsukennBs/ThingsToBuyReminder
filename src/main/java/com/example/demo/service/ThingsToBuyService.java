@@ -13,8 +13,11 @@ public interface ThingsToBuyService {
 	//品目レコード登録用
 	void insertItem(Item item);
 	
+	//シーケンステーブル登録用
+	void insertItemSeq(int itemId) ;
+	
 	//購入間隔レコード登録用
-	void insertPurchaseInterval(PurchaseInterval purchaseinterval, int itemId) ;
+	void insertPurchaseInterval(int itemId) ;
 	
 	//品目レコード更新用
 	void updateItem(Item item);
@@ -27,6 +30,9 @@ public interface ThingsToBuyService {
 	
 	//レコード削除用
 	void deleteById(int id);
+	
+	//シーケンステーブル削除用
+	public void deleteItemSeq(int itemId);
 	
 	//購入間隔レコード削除用
 	void deletePurchaseInterval(int itemId);
