@@ -18,29 +18,27 @@ public class PurchaseIntervalDaoImpl implements PurchaseIntervalDao {
 	}
 
 	@Override
-	public void insertInterval(PurchaseInterval interval, int itemId) {
+	public void insertInterval(int itemId) {
 		
 		String sql = "INSERT INTO things_to_buy.purchase_interval(item_id, purchase_interval, created_by, created_time, updated_by, updated_time)"
 				+ " VALUES (?, ?, ?, ?, ?, ?)";
-		String currentUser = "SELECT current_user()";
 		
 		jdbcTemplete.update(sql
 				,itemId
-				,interval.getPurchaseInterval()
-				,currentUser
+				,0
+				,getCurrentUser()
 				,LocalDateTime.now()
-				,currentUser				
+				,getCurrentUser()				
 				,LocalDateTime.now());
 	}
 
 	@Override
 	public int updateInterval(PurchaseInterval interval, int itemId) {
 		String sql = "UPDATE things_to_buy.purchase_interval SET purchase_interval = ?, updated_by=?, updated_time=? WHERE item_id = ?";
-		String currentUser = "SELECT current_user()";
 		
 		int resultInt = jdbcTemplete.update(sql
 				,interval.getPurchaseInterval()
-				,currentUser
+				,getCurrentUser()
 				,LocalDateTime.now()
 				,itemId);
 		
@@ -55,5 +53,15 @@ public class PurchaseIntervalDaoImpl implements PurchaseIntervalDao {
 		int resultInt = jdbcTemplete.update(sql,itemId);
 		
 		return resultInt;
+	}
+	
+	/**
+	 * 現在のDBユーザーを取得する
+	 * @return DBユーザー名
+	 */
+	private String getCurrentUser() {
+		String getCurrentUser = "SELECT current_user()";
+		String currentUser = jdbcTemplete.queryForObject(getCurrentUser, String.class);
+		return currentUser;
 	}
 }

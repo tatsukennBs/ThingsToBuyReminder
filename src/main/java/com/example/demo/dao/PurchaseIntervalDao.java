@@ -5,7 +5,7 @@ import com.example.demo.entity.PurchaseInterval;
 public interface PurchaseIntervalDao {
 	
 	//購入間隔（平均）登録用
-	void insertInterval(PurchaseInterval interval, int itemId);
+	void insertInterval(int itemId);
 	
 	//購入間隔（平均）更新用
 	int updateInterval(PurchaseInterval interval, int itemId);
