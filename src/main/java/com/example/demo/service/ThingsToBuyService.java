@@ -10,6 +10,9 @@ public interface ThingsToBuyService {
 	//全件検索し、最終購入日が最新のものを取得
 	List<Item> findLatestAll();
 
+	//指定されたIDで検索し、最終購入日が最新のものを取得
+	Item findById(int itenId);
+	
 	//品目レコード登録用
 	void insertItem(Item item);
 	

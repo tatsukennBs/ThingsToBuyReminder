@@ -30,6 +30,12 @@ public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 		//DAO(Repository)クラスで取得したものをそのまま返却
 		return dao.findLatestAll();
 	}
+	
+	@Override
+	public Item findById(int itemId) {
+		//DAO(Repository)クラスで取得したものをそのまま返却
+		return dao.findById(itemId);		
+	}
 
 	@Override
 	public void insertItem(Item item) {
@@ -53,7 +59,7 @@ public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 	public void updateItem(Item item) {
 		
 		if (dao.updateItem(item) == 0) {
-			throw new ItemNotFoundException("更新する品目が存在しませんでした。");
+			throw new ItemNotFoundException("更新する品目が存在しませんでした");
 		}
 	}
 
@@ -61,7 +67,7 @@ public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 	public void updatePurchaseDate(Item item) {
 		
 		if (dao.updatePurchaseDate(item) == 0) {
-			throw new ItemNotFoundException("更新する品目が存在しませんでした。");
+			throw new ItemNotFoundException("更新する品目が存在しませんでした");
 		}
 	}
 	
@@ -72,31 +78,25 @@ public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 		setPurchaseDate(purchaseinterval, itemId);
 		
 		if (daoInterval.updateInterval(purchaseinterval, itemId) == 0) {
-			throw new PurchaseIntervalNotFoundException("次回購入予測用の日付が計算できませんでした。");
+			throw new PurchaseIntervalNotFoundException("次回購入予測用の日付が計算できませんでした");
 		}		
 	}
 
 	@Override
-	public void deleteById(int id) {
+	public void deleteById(int itemId) {
 		
-		if (dao.deleteById(id) == 0) {
-			throw new ItemNotFoundException("削除する品目が存在しませんでした。");
-		}
+		dao.deleteById(itemId);
 	}
 	@Override
 	public void deleteItemSeq(int itemId) {
 		
-		if (daoSeq.delete(itemId) == 0) {
-			throw new ItemNotFoundException("削除する品目が存在しませんでした。");
-		}
+		daoSeq.delete(itemId);
 	}
 	
 	@Override
 	public void deletePurchaseInterval(int itemId) {
 		
-		if (daoInterval.deleteInterval(itemId) == 0) {
-			throw new PurchaseIntervalNotFoundException("次回購入予測用の日付が計算できませんでした。");
-		}
+		daoInterval.deleteInterval(itemId);
 	}
 	
 	/**
