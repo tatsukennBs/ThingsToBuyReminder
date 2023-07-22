@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+  	<title>リスト編集画面</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+<body>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+	<header class="sticky-top">
+		<nav class="navbar bg-body-secondary mb-4">
+			<div class="container-fluid d-flex">
+				<a class="navbar-brand" href="#">
+					<img src="" alt="logo" class="d-inline-block align-text-top">
+					買い物リスト
+				</a>
+			</div>
+		</nav>
+	</header>
+	<main class="container mb-5">
+		<h3>リスト編集画面</h3>
+		<div class="description">
+		内容更新したい項目の入力内容を変更し、内容更新ボタンを押してください。
+		</div>
+		<div th:if="${ErrorList}" th:each="error:${ErrorList}" class="col-sm-7">
+			<ul class="list-group list-group-flush">
+				<li th:text="${error}" class="list-group-item list-group-item-danger">
+			</ul>
+		</div>
+		<form method="POST" action="/ThingsToBuy/edit/complete" th:object="${thingsToBuyForm}">
+			<div class="row mt-4 mb-3">
+				<label for="inputItem" class="col-sm-2 col-form-label">品目名</label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" th:field="*{itemName}">
+				</div>
+			</div>
+			<div class="row mb-3">
+				<label for="inputCategory" class="col-sm-2 col-form-label">カテゴリ</label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" th:field="*{category}">
+				</div>
+			</div>
+			<div class="row mb-3">
+				<label for="inputLatestBuyDate" class="col-sm-2 col-form-label">最終購入日</label>
+				<div class="col-sm-3">
+					<input type="date" min="1900-01-01" max="2099-12-31" class="form-control" th:field="*{purchaseDate}">
+				</div>
+			</div>
+			<div class="d-flex gap-4 py-5 justify-content-center">
+				<button type="button" class="btn btn-primary" onclick= history.back()>戻る</button>
+				<button type="submit" class="btn btn-primary">内容更新</button>
+				<input type="hidden" name="itemid" th:value="${item.itemId}">
+			</div>
+		</form>	
+	</main>
+	<footer class="footer mt-auto bg-body-secondary fixed-bottom">
+		<div class="px-3">
+			<p>Copyright (C) All Rights Reserved.</p>
+		</div>
+	</footer>
+</body>
+</html>
