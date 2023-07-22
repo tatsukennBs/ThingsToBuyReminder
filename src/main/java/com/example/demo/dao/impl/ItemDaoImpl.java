@@ -61,6 +61,36 @@ public class ItemDaoImpl implements ItemDao {
 		return list;
 	}
 	
+	//指定されたIDでItemsテーブルを検索し、最終購入日が最新のものを取得
+		@Override
+		public Item findById(int id) {
+
+			String sql = "SELECT with_rownum.item_id, with_rownum.item_sequence, with_rownum.item_name,"
+					+ "with_rownum.category, with_rownum.purchase_date, purchase_interval.purchase_interval_id,"
+					+ "purchase_interval.purchase_interval, with_rownum.created_by, with_rownum.created_time,"
+					+ "with_rownum.updated_by, with_rownum.created_time FROM"
+					+ "  (SELECT *,row_number() over(partition by item_id ORDER BY purchase_date desc) rownum"
+					+ " FROM things_to_buy.items"
+					+ " ) with_rownum"
+					+ " LEFT JOIN things_to_buy.purchase_interval USING(item_id)"
+					+ " WHERE rownum = 1  AND item_id = ?";
+			
+			//JdbcTempleteを使用しSQL実行(指定されたIDのデータを取得）
+			Map<String,Object> map = jdbcTemplete.queryForMap(sql, id);
+			
+			Item item = new Item();
+			item.setItemId((int)map.get("item_id"));
+			item.setItemName((String)map.get("item_name"));
+			item.setCategory((String)map.get("category"));
+			item.setPurchaseDate((Date)map.get("purchase_date"));
+			if (map.get("purchase_interval")  == null) {
+				item.setPurchaseInterval(0);
+			} else {
+				item.setPurchaseInterval((int)map.get("purchase_interval"));
+			}			
+			return item;
+		}
+	
 	//itemsテーブルからidに紐づく最終購入日のListを取得
 	@Override
 	public List<Date> getPurchaseDate(int id) {
@@ -110,7 +140,7 @@ public class ItemDaoImpl implements ItemDao {
 		return ItemIdMax;
 	}
 
-	//Itemsテーブルの品目名、カテゴリの更新
+	//Itemsテーブルの品目名、カテゴリ、最終更新日の更新
 	@Override
 	public int updateItem(Item item) {
 		String sql = "UPDATE things_to_buy.items SET item_name = ?, category = ?, updated_by=?, updated_time=? WHERE item_id = ?";
@@ -125,15 +155,27 @@ public class ItemDaoImpl implements ItemDao {
 		return resultInt;
 	}
 
-	//Itemsテーブル最終購入日を更新
+	//Itemsテーブル最終購入日を更新(更新対象レコードが最新レコードのみ更新)
 	@Override
 	public int updatePurchaseDate(Item item) {
-		String preparesql = "SELECT @purchase_date_latest := MAX(purchase_date) FROM things_to_buy.items WHERE item_id = ?";
-		String executesql ="UPDATE things_to_buy.items SET purchase_date = ?, updated_by=?, updated_time=? WHERE item_id = ? AND purchase_date = @purchase_date_latest";
 		
-		//TODO 最終購入日更新時にitems_seqテーブルを更新する必要あり
+		//最終購入日が設定されていないレコードを抽出
+		String presql = "SELECT * FROM things_to_buy.items WHERE item_id = ? AND purchase_date IS NULL";
+		List<Map<String,Object>> presqlResult = jdbcTemplete.queryForList(presql, item.getItemId());
 		
-		jdbcTemplete.queryForList(preparesql,item.getItemId());
+		String executesql;
+		
+		//最終購入日が設定されていないレコードがある場合、最終購入日が設定されていないレコードを更新
+		if(presqlResult.size() != 0) {
+			
+			executesql = "UPDATE things_to_buy.items SET purchase_date = ?, updated_by=?, updated_time=? WHERE item_id = ? AND purchase_date IS NULL";
+			
+		} else {
+			
+			String preparesql = "SELECT @purchase_date_latest := MAX(purchase_date) FROM things_to_buy.items WHERE item_id = ?";
+			jdbcTemplete.queryForList(preparesql,item.getItemId());
+			executesql = "UPDATE things_to_buy.items SET purchase_date = ?, updated_by=?, updated_time=? WHERE item_id = ? AND purchase_date = @purchase_date_latest";
+		}
 		
 		int resultInt = jdbcTemplete.update(executesql
 				,item.getPurchaseDate()
@@ -153,4 +195,7 @@ public class ItemDaoImpl implements ItemDao {
 		
 		return resultInt;
 	}
+	
+	//TODO 最終購入日insertした後にitems_seqテーブルを更新する必要あり
+	
 }
