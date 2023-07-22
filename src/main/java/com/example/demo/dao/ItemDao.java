@@ -10,6 +10,9 @@ public interface ItemDao {
 	//全件検索し、最終購入日が最新のものを取得
 	List<Item> findLatestAll();
 	
+	//指定されたIDで検索し、最終購入日が最新のものを取得
+	Item findById(int id) ;
+	
 	//最終購入日のリストを取得
 	List<Date>  getPurchaseDate(int id);
 	
