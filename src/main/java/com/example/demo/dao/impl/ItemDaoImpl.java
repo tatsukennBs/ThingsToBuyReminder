@@ -99,7 +99,7 @@ public class ItemDaoImpl implements ItemDao {
 		return list;
 	}
 
-	//Itemsテーブルにレコード登録
+	//Itemsテーブルにレコード登録（新規登録）
 	@Override
 	public void insertItem(Item item) {
 		String sql = "INSERT INTO things_to_buy.items(item_id, item_sequence, item_name, category, purchase_date, created_by, created_time, updated_by, updated_time)"
@@ -108,6 +108,27 @@ public class ItemDaoImpl implements ItemDao {
 		jdbcTemplete.update(sql
 				,getItemIdMax() + 1
 				,1
+				,item.getItemName()
+				,item.getCategory()
+				,item.getPurchaseDate()
+				,getCurrentUser()
+				,LocalDateTime.now()
+				,getCurrentUser()				
+				,LocalDateTime.now());
+		
+		//item_idをエンティティにも設定する
+		item.setItemId(getItemIdMax() + 1);
+	}
+
+	//Itemsテーブルにレコード登録（最終購入日レコード追加）
+	@Override
+	public void insertPurchaseDate(Item item) {
+		String sql = "INSERT INTO things_to_buy.items(item_id, item_sequence, item_name, category, purchase_date, created_by, created_time, updated_by, updated_time)"
+				+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		
+		jdbcTemplete.update(sql
+				,item.getItemId()
+				,getItemSeqMax(item.getItemId())
 				,item.getItemName()
 				,item.getCategory()
 				,item.getPurchaseDate()
@@ -138,6 +159,18 @@ public class ItemDaoImpl implements ItemDao {
 		String getItemIdMax = "SELECT MAX(sequence_itemid) FROM things_to_buy.items_seq";
 		int ItemIdMax = jdbcTemplete.queryForObject(getItemIdMax, Integer.class);
 		return ItemIdMax;
+	}
+
+	/**
+	 * itemsテーブルの対象itemIDの連番最大値を取得する
+	 * @return itemsテーブルの対象itemIDの連番最大値
+	 */
+	private int getItemSeqMax(int itemId) {
+		String getItemSeqMax = "SELECT MAX(sequence_itemsequence) FROM things_to_buy.items_seq WHERE sequence_itemid = ?";
+		int ItemSeqMax = jdbcTemplete.queryForObject(
+				getItemSeqMax, Integer.class, itemId);
+		
+		return ItemSeqMax;
 	}
 
 	//Itemsテーブルの品目名、カテゴリ、最終更新日の更新
