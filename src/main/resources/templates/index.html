@@ -4,6 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
   	<title>買い物リスト</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 </head>
@@ -29,32 +30,25 @@
 		下記リスト商品を購入したら<strong>購入ボタン</strong>を押してください。
 		</div>
 		<div class="table-responsive">
-				<table class="table text-nowrap table-striped table-bordered border-success-subtle itemtable">
+				<table id="itemtable"class="table text-nowrap table-striped table-bordered border-success-subtle itemtable">
 					<tr class="table-success">
 						<th class="tblelement1">品目名</th>
 						<th class="tblelement2">カテゴリ</th>
 						<th class="tblelement3">最終購入日</th>
-						<th class="tblelement4">在庫切れ予測日</tth>
+						<th class="tblelement4">在庫切れ予測日</th>
 						<th class="tblelement5">購入ボタン</th>
 						<th class="tblelement6">編集・削除リンク</th>
 					</tr>
 					<tr th:each="item : ${itemlist}">
 						<td th:text=${item.itemName}></td>
 						<td th:text=${item.category}></td>
-						<td th:text=${item.purchaseDate}></td>
+						<td th:text="${#dates.format(item.purchaseDate, 'yyyy/MM/dd')}"></td>
 						<td th:text=${item.purchaseInterval}></td>
 						<td><input type="button" class="btn btn-danger rounded-pill" th:onclick="|location.href='/ThingsToBuy/registPurchaseDate?itemid=__${item.itemId}__'|" value="購入しました"></input></td>
 						<td>
 						<input type="button"  class="btn btn-link" th:onclick="|location.href='/ThingsToBuy/edit?itemid=__${item.itemId}__'|" value="編集"></input>
-						<!--<input type="button"  class="btn btn-link" th:attr="onclick= 'location.href=\'/ThingsToBuy/edit/\' + @{{id}(id=${item.itemId})}'" value="編集"></input> -->
 						<input type="button" class="btn btn-link" th:onclick="|location.href='/ThingsToBuy/delete/complete?itemid=__${item.itemId}__'|" value="削除"></input>
 						</td>
-<!--						<td>
-							<form>
-								<input type="hidden" name="itemId" th:value=${item.itemId}></input>
-								<input type="submit" name="itemId" th:value=${item.itemId}></input>
-							</form>
-						</td>-->
 					</tr>
 				</table>
 		</div>
@@ -66,5 +60,43 @@
 			<p>Copyright (C) All Rights Reserved.</p>
 		</div>
 	</footer>
+	<script type="text/javascript" th:inline="javascript">
+	
+		window.onload = function calcNextPurchaseDate() {
+		
+		//コントロールクラスで設定したitemリストを取得
+		var itemlist = /*[[${itemlist}]]*/;
+		
+		var nextPurchaseDate;
+		var nextPurchaseDateArray = new Array();
+		var itemtable = document.getElementById("itemtable");
+		
+		//itemリスト数分ループし、最終購入日に平均購入間隔を加算し配列に格納（jsクラスライブラリを使用）
+		for(var item of itemlist) {
+			
+			nextPurchaseDate = moment(item.purchaseDate).add(item.purchaseInterval, 'days');
+			nextPurchaseDateArray.push(nextPurchaseDate.format('YYYY/MM/DD'));
+		}
+		
+		//テーブルを取得し在庫切れ予測日列の値を上書き
+		for(var i = 0; i < itemtable.rows.length; i++){
+			
+			//ヘッダ行は書き換え実施しないためスキップ
+			if(i == 0){
+ 				continue;
+ 			}
+			
+			// 平均購入間隔が0（初回登録）の場合は在庫切れ予測日はブランク表示
+			if(itemtable.rows[i].cells[3].textContent == 0) {
+				
+				itemtable.rows[i].cells[3].textContent = "";
+				
+			} else {
+				
+				itemtable.rows[i].cells[3].textContent = nextPurchaseDateArray[i - 1];
+			}
+		}
+	}
+	</script>
 </body>
 </html>
