@@ -21,8 +21,8 @@ public class ThingsToBuyForm {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date purchaseDate;
 	
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date purchaseinterval;
+	private int purchaseInterval;
+	
 	
 	public ThingsToBuyForm() {
 		
@@ -52,11 +52,11 @@ public class ThingsToBuyForm {
 		this.purchaseDate = purchaseDate;
 	}
 
-	public Date getPurchaseinterval() {
-		return purchaseinterval;
+	public int getPurchaseInterval() {
+		return purchaseInterval;
 	}
 
-	public void setPurchaseinterval(Date purchaseinterval) {
-		this.purchaseinterval = purchaseinterval;
+	public void setPurchaseInterval(int purchaseInterval) {
+		this.purchaseInterval = purchaseInterval;
 	}
 }
