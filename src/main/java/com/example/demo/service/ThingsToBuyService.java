@@ -13,11 +13,14 @@ public interface ThingsToBuyService {
 	//指定されたIDで検索し、最終購入日が最新のものを取得
 	Item findById(int itenId);
 	
-	//品目レコード登録用
+	//品目レコード登録用（新規登録）
 	void insertItem(Item item);
 	
+	//品目レコード登録用（最終購入日レコード追加）
+	void insertPurchaseDate(Item item);
+	
 	//シーケンステーブル登録用
-	void insertItemSeq(int itemId) ;
+	void insertItemSeq(int itemId, int itemseq) ;
 	
 	//購入間隔レコード登録用
 	void insertPurchaseInterval(int itemId) ;

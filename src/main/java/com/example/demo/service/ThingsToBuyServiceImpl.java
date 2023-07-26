@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dao.ItemDao;
 import com.example.demo.dao.ItemSeqDao;
@@ -15,12 +16,12 @@ import com.example.demo.logic.PurchaseIntervalLogic;
 @Service
 public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 
-	private final ItemDao dao;
+	private final ItemDao daoItem;
 	private final ItemSeqDao daoSeq;
 	private final PurchaseIntervalDao daoInterval;
 	
-	public ThingsToBuyServiceImpl(ItemDao dao, ItemSeqDao daoSeq, PurchaseIntervalDao daoInterval) {
-		this.dao = dao;
+	public ThingsToBuyServiceImpl(ItemDao daoItem, ItemSeqDao daoSeq, PurchaseIntervalDao daoInterval) {
+		this.daoItem = daoItem;
 		this.daoSeq = daoSeq;
 		this.daoInterval = daoInterval;
 	}
@@ -28,50 +29,63 @@ public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 	@Override
 	public List<Item> findLatestAll() {
 		//DAO(Repository)クラスで取得したものをそのまま返却
-		return dao.findLatestAll();
+		return daoItem.findLatestAll();
 	}
 	
 	@Override
 	public Item findById(int itemId) {
 		//DAO(Repository)クラスで取得したものをそのまま返却
-		return dao.findById(itemId);		
+		return daoItem.findById(itemId);		
 	}
 
 	@Override
+	@Transactional(rollbackFor=Exception.class)
 	public void insertItem(Item item) {
 		//DAO(Repository)クラスのInsert処理を呼び出し
-		dao.insertItem(item);
+		daoItem.insertItem(item);
 	}
-	
+
 	@Override
-	public void insertItemSeq(int itemId) {
+	@Transactional(rollbackFor=Exception.class)
+	public void insertPurchaseDate(Item item) {
 		//DAO(Repository)クラスのInsert処理を呼び出し
-		daoSeq.insert(itemId);
+		daoItem.insertPurchaseDate(item);
 	}
 	
 	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void insertItemSeq(int itemId, int itemseq) {
+		//DAO(Repository)クラスのInsert処理を呼び出し
+		daoSeq.insert(itemId, itemseq);
+	}
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
 	public void insertPurchaseInterval(int itemId) {
 		//DAO(Repository)クラスのInsert処理を呼び出し
-		daoInterval.insertInterval(itemId);	
+		daoInterval.insertInterval(itemId);
 	}
 
 	@Override
+	@Transactional(rollbackFor=Exception.class)
 	public void updateItem(Item item) {
 		
-		if (dao.updateItem(item) == 0) {
+		if (daoItem.updateItem(item) == 0) {
 			throw new ItemNotFoundException("更新する品目が存在しませんでした");
 		}
 	}
 
 	@Override
+	@Transactional(rollbackFor=Exception.class)
 	public void updatePurchaseDate(Item item) {
 		
-		if (dao.updatePurchaseDate(item) == 0) {
+		if (daoItem.updatePurchaseDate(item) == 0) {
 			throw new ItemNotFoundException("更新する品目が存在しませんでした");
 		}
 	}
 	
 	@Override
+	@Transactional(rollbackFor=Exception.class)
 	public void updatePurchaseInterval(PurchaseInterval purchaseinterval, int itemId) {
 		
 		//購入間隔の平均値をエンティティに設定
@@ -83,17 +97,20 @@ public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 	}
 
 	@Override
+	@Transactional(rollbackFor=Exception.class)
 	public void deleteById(int itemId) {
 		
-		dao.deleteById(itemId);
+		daoItem.deleteById(itemId);
 	}
 	@Override
+	@Transactional(rollbackFor=Exception.class)
 	public void deleteItemSeq(int itemId) {
 		
 		daoSeq.delete(itemId);
 	}
 	
 	@Override
+	@Transactional(rollbackFor=Exception.class)
 	public void deletePurchaseInterval(int itemId) {
 		
 		daoInterval.deleteInterval(itemId);
@@ -106,7 +123,7 @@ public class ThingsToBuyServiceImpl implements ThingsToBuyService {
 	 */
 	private void setPurchaseDate(PurchaseInterval purchaseinterval, int itemId) {
 		//最終購入日リストを取得
-		List<Date> list = dao.getPurchaseDate(itemId);
+		List<Date> list = daoItem.getPurchaseDate(itemId);
 		
 		//最終購入日リストをもとに購入間隔の平均値を算出
 		PurchaseIntervalLogic logic = new PurchaseIntervalLogic();
