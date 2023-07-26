@@ -15,13 +15,13 @@ public class ItemSeqDaoImpl implements ItemSeqDao {
 	}
 
 	@Override
-	public void insert(int itemId) {
+	public void insert(int itemId, int itemseq) {
 		String sql = "INSERT INTO things_to_buy.items_seq(sequence_itemid, sequence_itemsequence)"
 				+ " VALUES (?, ?)";
 		
 		jdbcTemplete.update(sql
 				,itemId
-				,1);
+				,itemseq);
 	}
 
 	@Override
