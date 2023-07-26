@@ -113,11 +113,12 @@ public class ItemDaoImpl implements ItemDao {
 				,item.getPurchaseDate()
 				,getCurrentUser()
 				,LocalDateTime.now()
-				,getCurrentUser()				
+				,getCurrentUser()
 				,LocalDateTime.now());
 		
-		//item_idをエンティティにも設定する
+		//itemid,itemsequenceをエンティティにも設定する
 		item.setItemId(getItemIdMax() + 1);
+		item.setItemSequence(1);
 	}
 
 	//Itemsテーブルにレコード登録（最終購入日レコード追加）
@@ -128,52 +129,20 @@ public class ItemDaoImpl implements ItemDao {
 		
 		jdbcTemplete.update(sql
 				,item.getItemId()
-				,getItemSeqMax(item.getItemId())
+				,getItemSeqMax(item.getItemId()) + 1
 				,item.getItemName()
 				,item.getCategory()
 				,item.getPurchaseDate()
 				,getCurrentUser()
 				,LocalDateTime.now()
-				,getCurrentUser()				
+				,getCurrentUser()
 				,LocalDateTime.now());
 		
-		//item_idをエンティティにも設定する
-		item.setItemId(getItemIdMax() + 1);
+		//itemsequenceをエンティティにも設定する
+		item.setItemSequence(getItemSeqMax(item.getItemId()) + 1);
 	}
 	
-	/**
-	 * 現在のDBユーザーを取得する
-	 * @return DBユーザー名
-	 */
-	private String getCurrentUser() {
-		String getCurrentUser = "SELECT current_user()";
-		String currentUser = jdbcTemplete.queryForObject(getCurrentUser, String.class);
-		return currentUser;
-	}
-
-	/**
-	 * itemsテーブルのitemIDの最大値を取得する
-	 * @return itemsテーブルのitemIDの最大値
-	 */
-	private int getItemIdMax() {
-		String getItemIdMax = "SELECT MAX(sequence_itemid) FROM things_to_buy.items_seq";
-		int ItemIdMax = jdbcTemplete.queryForObject(getItemIdMax, Integer.class);
-		return ItemIdMax;
-	}
-
-	/**
-	 * itemsテーブルの対象itemIDの連番最大値を取得する
-	 * @return itemsテーブルの対象itemIDの連番最大値
-	 */
-	private int getItemSeqMax(int itemId) {
-		String getItemSeqMax = "SELECT MAX(sequence_itemsequence) FROM things_to_buy.items_seq WHERE sequence_itemid = ?";
-		int ItemSeqMax = jdbcTemplete.queryForObject(
-				getItemSeqMax, Integer.class, itemId);
-		
-		return ItemSeqMax;
-	}
-
-	//Itemsテーブルの品目名、カテゴリ、最終更新日の更新
+		//Itemsテーブルの品目名、カテゴリ、最終更新日の更新
 	@Override
 	public int updateItem(Item item) {
 		String sql = "UPDATE things_to_buy.items SET item_name = ?, category = ?, updated_by=?, updated_time=? WHERE item_id = ?";
@@ -229,6 +198,35 @@ public class ItemDaoImpl implements ItemDao {
 		return resultInt;
 	}
 	
-	//TODO 最終購入日insertした後にitems_seqテーブルを更新する必要あり
-	
+	/**
+	 * 現在のDBユーザーを取得する
+	 * @return DBユーザー名
+	 */
+	private String getCurrentUser() {
+		String getCurrentUser = "SELECT current_user()";
+		String currentUser = jdbcTemplete.queryForObject(getCurrentUser, String.class);
+		return currentUser;
+	}
+
+	/**
+	 * itemsテーブルのitemIDの最大値を取得する
+	 * @return itemsテーブルのitemIDの最大値
+	 */
+	private int getItemIdMax() {
+		String getItemIdMax = "SELECT MAX(sequence_itemid) FROM things_to_buy.items_seq";
+		int ItemIdMax = jdbcTemplete.queryForObject(getItemIdMax, Integer.class);
+		return ItemIdMax;
+	}
+
+	/**
+	 * itemsテーブルの対象itemIDの連番最大値を取得する
+	 * @return itemsテーブルの対象itemIDの連番最大値
+	 */
+	private int getItemSeqMax(int itemId) {
+		String getItemSeqMax = "SELECT MAX(sequence_itemsequence) FROM things_to_buy.items_seq WHERE sequence_itemid = ?";
+		int ItemSeqMax = jdbcTemplete.queryForObject(
+				getItemSeqMax, Integer.class, itemId);
+		
+		return ItemSeqMax;
+	}
 }
