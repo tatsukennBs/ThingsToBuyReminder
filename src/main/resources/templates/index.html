@@ -11,7 +11,8 @@
 			<input type="button" class="btn btn-success" th:attr="onclick= 'location.href=\'/ThingsToBuy/regist\''" value="品目登録"></input>
 		</div>
 		<div class="description">
-		下記商品を購入したら<strong>購入ボタン</strong>を押してください。
+		下記商品を購入したら<strong>購入ボタン</strong>を押してください。<br/>
+		在庫切れ予測日については、購入回数が複数回登録された場合に算出されます。
 		</div>
 		<div th:if="${complete}" class="col-sm-7 mb-3">
 			<ul class="list-group list-group-flush">
