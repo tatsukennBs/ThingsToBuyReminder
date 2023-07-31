@@ -31,10 +31,10 @@
 - MySQL 8.0.31
 - thymeleaf 3.1.1
 - bootstrap 5.3.0
-- AWS（準備中）
+- AWS（デプロイ準備中）
 	- VPC
 	- EC2
-	- RDS
+	- RDS(MySQL)
 # 使用ツール、ライブラリ
 - draw.io<br/>  画面遷移図作成用に使用
 - moment.js<br/>  日付計算用にライブラリ使用
