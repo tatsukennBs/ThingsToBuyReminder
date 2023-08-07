@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import com.example.demo.dao.ItemDao;
 import com.example.demo.entity.Item;
@@ -214,8 +215,18 @@ public class ItemDaoImpl implements ItemDao {
 	 */
 	private int getItemIdMax() {
 		String getItemIdMax = "SELECT MAX(sequence_itemid) FROM things_to_buy.items_seq";
-		int ItemIdMax = jdbcTemplete.queryForObject(getItemIdMax, Integer.class);
-		return ItemIdMax;
+		
+		List<Integer> ItemIdMax = jdbcTemplete.queryForList(getItemIdMax, Integer.class);
+		
+		while (ItemIdMax.remove(null));
+		
+		//初回登録時は0を返却する。
+		if (CollectionUtils.isEmpty(ItemIdMax)) {
+			return 0;
+			
+		} else {
+			return ItemIdMax.get(0);
+		}
 	}
 
 	/**
@@ -224,9 +235,17 @@ public class ItemDaoImpl implements ItemDao {
 	 */
 	private int getItemSeqMax(int itemId) {
 		String getItemSeqMax = "SELECT MAX(sequence_itemsequence) FROM things_to_buy.items_seq WHERE sequence_itemid = ?";
-		int ItemSeqMax = jdbcTemplete.queryForObject(
-				getItemSeqMax, Integer.class, itemId);
 		
-		return ItemSeqMax;
+		List<Integer> ItemSeqMax = jdbcTemplete.queryForList(getItemSeqMax, Integer.class, itemId);
+		
+		while (ItemSeqMax.remove(null));
+		
+		//初回登録時は0を返却する。
+		if (CollectionUtils.isEmpty(ItemSeqMax)) {
+			return 0;
+			
+		} else {
+			return ItemSeqMax.get(0);
+		}
 	}
 }
