@@ -23,7 +23,7 @@
 - リスト削除
 	- 各品目行の「削除」リンクから品目名、カテゴリ、最終購入日の編集が可能
 # URL
-- xxx
+- http://www.thingstobuy.org:8080/ThingsToBuy
 
 # 使用技術
 - Java SE 17
@@ -31,10 +31,15 @@
 - MySQL 8.0.31
 - thymeleaf 3.1.1
 - bootstrap 5.3.0
-- AWS（デプロイ準備中）
+- AWS
 	- VPC
 	- EC2
-	- RDS(MySQL)
+	- RDS
+   	- Route53
+- ビルドツール:Gradle
+- Webサーバ：Apache
+- サーブレットコンテナ：Tomcat
+
 # 使用ツール、ライブラリ
 - draw.io<br/>  画面遷移図作成用に使用
 - moment.js<br/>  日付計算用にライブラリ使用
