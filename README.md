@@ -40,6 +40,9 @@
 - Webサーバ：Apache
 - サーブレットコンテナ：Tomcat
 
+# AWS構成
+![買い物リストAWS構成](https://github.com/tatsukennBs/ThingsToBuyReminder/assets/70462631/34a3d003-aaa8-457f-9e88-751afb183bc5)
+
 # 使用ツール、ライブラリ
 - draw.io<br/>  画面遷移図作成用に使用
 - moment.js<br/>  日付計算用にライブラリ使用
